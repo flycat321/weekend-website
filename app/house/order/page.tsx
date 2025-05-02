@@ -16,19 +16,19 @@ const exteriorOptions = [
     id: "titanium",
     name: "深灰色钛锌板",
     price: 30000,
-    image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2070",
+    image: "/house-new1.png",
   },
   {
     id: "aluminum",
     name: "白色铝板",
     price: 12000,
-    image: "https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?q=80&w=2084",
+    image: "/house-new1.png",
   },
   {
     id: "wood",
     name: "实木外墙板",
     price: 18000,
-    image: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=2053",
+    image: "/house-new1.png",
   },
 ]
 

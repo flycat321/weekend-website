@@ -1,0 +1,7 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/page": "app/page.js",
+  "/admin/content-manager/edit/[id]/page": "app/admin/content-manager/edit/[id]/page.js",
+  "/admin/content-manager/page": "app/admin/content-manager/page.js",
+  "/admin/content/page": "app/admin/content/page.js"
+}
