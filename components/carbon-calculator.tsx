@@ -1,211 +1,152 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent } from "@/components/ui/card"
-import { ArrowRight, BarChart3 } from "lucide-react"
+import { TreePine, Zap, Car } from "lucide-react"
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts"
+import Reveal from "@/components/motion/reveal"
 
 export default function CarbonCalculator() {
-  const [distance, setDistance] = useState(100)
-  const [days, setDays] = useState(2)
+  const [distance, setDistance] = useState(200)
+  const [days, setDays] = useState(3)
   const [people, setPeople] = useState(2)
 
-  // 简单的碳排放计算逻辑
-  const hotelEmission = distance * 0.2 + days * people * 15
-  const traditionalEmission = distance * 0.2 + days * people * 10
-  const weekendEmission = distance * 0.2 + days * people * 2
+  // Carbon emission calculation (kg CO2)
+  // Transport: car ~0.15 kg/km per person
+  const transportEmission = distance * 0.15 * people
+  // Accommodation: hotel ~25 kg/night/person, traditional ~15, weekend house ~3 (solar-powered)
+  const hotelEmission = transportEmission + days * people * 25
+  const traditionalEmission = transportEmission + days * people * 15
+  const weekendEmission = transportEmission + days * people * 3
 
-  const hotelSavings = hotelEmission - weekendEmission
-  const traditionalSavings = traditionalEmission - weekendEmission
+  const savings = hotelEmission - weekendEmission
+
+  const chartData = [
+    { name: "星级酒店", value: Math.round(hotelEmission), fill: "#ef4444" },
+    { name: "传统民宿", value: Math.round(traditionalEmission), fill: "#f59e0b" },
+    { name: "Weekend House", value: Math.round(weekendEmission), fill: "hsl(174, 100%, 40%)" },
+  ]
 
   return (
-    <section className="py-16 bg-gradient-to-b from-white to-[#f8f9fa]">
+    <section className="py-20 bg-gradient-to-b from-white to-brand-cream">
       <div className="container px-4 md:px-6">
-        <div className="text-center mb-10">
-          <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl mb-4">碳足迹计算器</h2>
-          <p className="text-muted-foreground md:text-xl max-w-3xl mx-auto">
-            对比住酒店/传统民宿与weekend house的碳排放差异，了解您的环保贡献
-          </p>
-        </div>
+        <Reveal>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl mb-4 font-serif">碳足迹计算器</h2>
+            <p className="text-muted-foreground md:text-lg max-w-2xl mx-auto">
+              对比不同住宿方式的碳排放差异，了解您的环保贡献
+            </p>
+          </div>
+        </Reveal>
 
-        <div className="grid lg:grid-cols-2 gap-10 items-center">
-          <div className="space-y-6">
-            <div className="space-y-2">
-              <Label>出行距离 (公里)</Label>
-              <div className="flex items-center gap-4">
+        <div className="grid lg:grid-cols-2 gap-12 items-start">
+          <Reveal direction="left" delay={0.1}>
+            <div className="space-y-8 bg-white rounded-2xl p-8 shadow-sm border">
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <Label className="text-base font-medium">出行距离</Label>
+                  <span className="text-sm text-primary font-semibold">{distance} 公里</span>
+                </div>
                 <Slider
                   value={[distance]}
-                  min={10}
+                  min={20}
                   max={500}
                   step={10}
-                  onValueChange={(value) => setDistance(value[0])}
-                  className="flex-1"
-                />
-                <Input
-                  type="number"
-                  value={distance}
-                  onChange={(e) => setDistance(Number(e.target.value))}
-                  className="w-20"
+                  onValueChange={(v) => setDistance(v[0])}
                 />
               </div>
-            </div>
 
-            <div className="space-y-2">
-              <Label>停留天数</Label>
-              <div className="flex items-center gap-4">
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <Label className="text-base font-medium">停留天数</Label>
+                  <span className="text-sm text-primary font-semibold">{days} 天</span>
+                </div>
                 <Slider
                   value={[days]}
                   min={1}
                   max={14}
                   step={1}
-                  onValueChange={(value) => setDays(value[0])}
-                  className="flex-1"
+                  onValueChange={(v) => setDays(v[0])}
                 />
-                <Input type="number" value={days} onChange={(e) => setDays(Number(e.target.value))} className="w-20" />
               </div>
-            </div>
 
-            <div className="space-y-2">
-              <Label>人数</Label>
-              <div className="flex items-center gap-4">
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <Label className="text-base font-medium">出行人数</Label>
+                  <span className="text-sm text-primary font-semibold">{people} 人</span>
+                </div>
                 <Slider
                   value={[people]}
                   min={1}
                   max={8}
                   step={1}
-                  onValueChange={(value) => setPeople(value[0])}
-                  className="flex-1"
-                />
-                <Input
-                  type="number"
-                  value={people}
-                  onChange={(e) => setPeople(Number(e.target.value))}
-                  className="w-20"
+                  onValueChange={(v) => setPeople(v[0])}
                 />
               </div>
+
+              {/* Summary card */}
+              <div className="bg-primary/5 rounded-xl p-5 border border-primary/10">
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  选择 Weekend House，此次旅行将比酒店减少{" "}
+                  <span className="font-bold text-primary">{Math.round(savings)} kg</span>{" "}
+                  碳排放，相当于种植{" "}
+                  <span className="font-bold text-primary">{Math.max(1, Math.round(savings / 20))}</span>{" "}
+                  棵树一年的吸碳量。
+                </p>
+              </div>
             </div>
+          </Reveal>
 
-            <div className="pt-4">
-              <Button className="w-full bg-[#00CED1] hover:bg-[#00CED1]/90">
-                计算碳足迹 <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+          <Reveal direction="right" delay={0.2}>
+            <div className="space-y-6">
+              {/* Recharts bar chart */}
+              <div className="bg-white rounded-2xl p-6 shadow-sm border">
+                <h3 className="text-sm font-medium text-muted-foreground mb-6 tracking-wider uppercase">碳排放对比 (kg CO₂)</h3>
+                <ResponsiveContainer width="100%" height={280}>
+                  <BarChart data={chartData} barSize={48}>
+                    <XAxis dataKey="name" tick={{ fontSize: 13 }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fontSize: 12 }} axisLine={false} tickLine={false} width={40} />
+                    <Tooltip
+                      formatter={(value: number) => [`${value} kg CO₂`, "碳排放"]}
+                      contentStyle={{ borderRadius: "8px", border: "1px solid #e5e7eb" }}
+                    />
+                    <Bar dataKey="value" radius={[8, 8, 0, 0]}>
+                      {chartData.map((entry, index) => (
+                        <Cell key={index} fill={entry.fill} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Impact metrics */}
+              <div className="grid grid-cols-3 gap-4">
+                <Card className="border-0 shadow-sm">
+                  <CardContent className="p-4 text-center">
+                    <TreePine className="h-6 w-6 text-primary mx-auto mb-2" />
+                    <div className="text-xl font-bold">{Math.max(1, Math.round(savings / 20))}</div>
+                    <div className="text-xs text-muted-foreground">棵树年吸碳量</div>
+                  </CardContent>
+                </Card>
+                <Card className="border-0 shadow-sm">
+                  <CardContent className="p-4 text-center">
+                    <Car className="h-6 w-6 text-primary mx-auto mb-2" />
+                    <div className="text-xl font-bold">{Math.round(savings * 4)}</div>
+                    <div className="text-xs text-muted-foreground">公里汽车排放</div>
+                  </CardContent>
+                </Card>
+                <Card className="border-0 shadow-sm">
+                  <CardContent className="p-4 text-center">
+                    <Zap className="h-6 w-6 text-primary mx-auto mb-2" />
+                    <div className="text-xl font-bold">{Math.round(savings * 1.5)}</div>
+                    <div className="text-xs text-muted-foreground">度电节约</div>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
-          </div>
-
-          <div>
-            <Tabs defaultValue="comparison">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="comparison">碳排放对比</TabsTrigger>
-                <TabsTrigger value="savings">减排效益</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="comparison" className="pt-6">
-                <div className="space-y-6">
-                  <div className="flex items-end gap-4">
-                    <div className="flex-1">
-                      <div className="mb-2 text-sm font-medium">酒店</div>
-                      <div
-                        className="bg-red-500 h-[200px] rounded-t-md relative"
-                        style={{ height: `${(hotelEmission / (hotelEmission + 20)) * 200}px` }}
-                      >
-                        <div className="absolute -top-6 left-0 right-0 text-center font-bold">
-                          {hotelEmission.toFixed(1)} kg
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex-1">
-                      <div className="mb-2 text-sm font-medium">传统民宿</div>
-                      <div
-                        className="bg-yellow-500 h-[150px] rounded-t-md relative"
-                        style={{ height: `${(traditionalEmission / (hotelEmission + 20)) * 200}px` }}
-                      >
-                        <div className="absolute -top-6 left-0 right-0 text-center font-bold">
-                          {traditionalEmission.toFixed(1)} kg
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex-1">
-                      <div className="mb-2 text-sm font-medium">weekend house</div>
-                      <div
-                        className="bg-green-500 h-[50px] rounded-t-md relative"
-                        style={{ height: `${(weekendEmission / (hotelEmission + 20)) * 200}px` }}
-                      >
-                        <div className="absolute -top-6 left-0 right-0 text-center font-bold">
-                          {weekendEmission.toFixed(1)} kg
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <Card>
-                    <CardContent className="p-4">
-                      <p className="text-sm text-muted-foreground">
-                        选择weekend house，您的这次旅行将比入住酒店减少
-                        <span className="font-bold text-green-500">{hotelSavings.toFixed(1)}kg</span>
-                        的碳排放，相当于种植
-                        <span className="font-bold text-green-500">{Math.round(hotelSavings / 10)}</span>
-                        棵树的年吸碳量。
-                      </p>
-                    </CardContent>
-                  </Card>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="savings" className="pt-6">
-                <div className="space-y-6">
-                  <div className="grid grid-cols-2 gap-4">
-                    <Card>
-                      <CardContent className="p-4 flex flex-col items-center text-center">
-                        <BarChart3 className="h-10 w-10 text-[#00CED1] mb-2" />
-                        <div className="font-bold text-2xl">{hotelSavings.toFixed(1)} kg</div>
-                        <p className="text-sm text-muted-foreground">比酒店减少的碳排放</p>
-                      </CardContent>
-                    </Card>
-
-                    <Card>
-                      <CardContent className="p-4 flex flex-col items-center text-center">
-                        <BarChart3 className="h-10 w-10 text-[#00CED1] mb-2" />
-                        <div className="font-bold text-2xl">{traditionalSavings.toFixed(1)} kg</div>
-                        <p className="text-sm text-muted-foreground">比传统民宿减少的碳排放</p>
-                      </CardContent>
-                    </Card>
-                  </div>
-
-                  <Card>
-                    <CardContent className="p-6">
-                      <h3 className="font-semibold mb-2">您的环保贡献相当于：</h3>
-                      <ul className="space-y-2">
-                        <li className="flex items-center gap-2">
-                          <div className="h-2 w-2 rounded-full bg-[#00CED1]"></div>
-                          <span>种植 {Math.round(hotelSavings / 10)} 棵树的年吸碳量</span>
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <div className="h-2 w-2 rounded-full bg-[#00CED1]"></div>
-                          <span>减少 {Math.round(hotelSavings * 0.4)} 公里的汽车行驶</span>
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <div className="h-2 w-2 rounded-full bg-[#00CED1]"></div>
-                          <span>节约 {Math.round(hotelSavings * 5)} 度电的使用</span>
-                        </li>
-                      </ul>
-                    </CardContent>
-                  </Card>
-                </div>
-              </TabsContent>
-            </Tabs>
-
-            <div className="mt-6 text-center">
-              <Button variant="link" className="text-[#00CED1]">
-                了解更多碳足迹计算方法
-              </Button>
-            </div>
-          </div>
+          </Reveal>
         </div>
       </div>
     </section>
