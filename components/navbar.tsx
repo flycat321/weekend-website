@@ -198,11 +198,8 @@ export default function Navbar() {
           </DropdownMenu>
 
           <div className="hidden sm:flex items-center gap-3">
-            <Button
-              className="bg-primary hover:bg-primary/90 text-white rounded-full px-6"
-              onClick={() => router.push("/stay")}
-            >
-              预订体验
+            <Button asChild className="bg-primary hover:bg-primary/90 text-white rounded-full px-6">
+              <Link href="/stay">预订体验</Link>
             </Button>
           </div>
         </div>

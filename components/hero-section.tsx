@@ -4,6 +4,7 @@ import { useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { ArrowRight } from "lucide-react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { motion, useScroll, useTransform, useInView } from "framer-motion"
 
 function CountUp({ target, suffix = "" }: { target: number; suffix?: string }) {
@@ -141,12 +142,10 @@ export default function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.6 }}
         >
-          <Button
-            className="bg-primary hover:bg-primary/90 text-white rounded-full px-8 h-12 text-base"
-            size="lg"
-            onClick={() => router.push("/stay")}
-          >
-            预订体验 <ArrowRight className="ml-2 h-4 w-4" />
+          <Button asChild className="bg-primary hover:bg-primary/90 text-white rounded-full px-8 h-12 text-base" size="lg">
+            <Link href="/stay">
+              预订体验 <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
           </Button>
           <Button
             variant="outline"
