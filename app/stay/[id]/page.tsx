@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { FormEvent, useState } from "react"
 import Image from "next/image"
 import { useParams } from "next/navigation"
 import { notFound } from "next/navigation"
@@ -14,6 +14,9 @@ import { cn } from "@/lib/utils"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
 import Reveal from "@/components/motion/reveal"
@@ -29,6 +32,8 @@ export default function StayDetailPage() {
     to: addDays(new Date(), 2),
   })
   const [guestCount, setGuestCount] = useState("2")
+  const [bookingOpen, setBookingOpen] = useState(false)
+  const [bookingSent, setBookingSent] = useState(false)
 
   if (!house) {
     return notFound()
@@ -38,6 +43,10 @@ export default function StayDetailPage() {
     ? Math.ceil((date.to.getTime() - date.from.getTime()) / (1000 * 60 * 60 * 24))
     : 2
   const totalPrice = house.price * nights
+  const submitBookingRequest = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setBookingSent(true)
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
@@ -254,8 +263,8 @@ export default function StayDetailPage() {
                       </div>
                     </div>
 
-                    <Button className="w-full bg-primary hover:bg-primary/90 text-white h-12 rounded-full text-base">
-                      立即预订
+                    <Button className="w-full bg-primary hover:bg-primary/90 text-white h-12 rounded-full text-base" onClick={() => { setBookingSent(false); setBookingOpen(true) }}>
+                      提交入住需求
                     </Button>
 
                     <p className="text-xs text-center text-muted-foreground">预订确认后可免费取消</p>
@@ -278,6 +287,16 @@ export default function StayDetailPage() {
           </div>
         </div>
       </main>
+
+      <Dialog open={bookingOpen} onOpenChange={setBookingOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{bookingSent ? "需求已收到" : `预约 ${house.name}`}</DialogTitle>
+            <DialogDescription>{bookingSent ? "这是演示版需求收集流程。接入表单服务或 CRM 后，可由顾问继续跟进。" : `入住 ${nights} 晚，${guestCount} 位客人；参考总价 ¥${totalPrice.toLocaleString()}。无需支付，我们会在确认可订状态后联系您。`}</DialogDescription>
+          </DialogHeader>
+          {bookingSent ? <Button className="w-full" onClick={() => setBookingOpen(false)}>完成</Button> : <form className="space-y-4" onSubmit={submitBookingRequest}><Input required name="name" placeholder="您的姓名" /><Input required name="contact" placeholder="手机或邮箱" /><Textarea name="note" placeholder="入住偏好、同行宠物或其他需求（选填）" /><Button type="submit" className="w-full">提交预约需求</Button></form>}
+        </DialogContent>
+      </Dialog>
 
       <Footer />
     </div>

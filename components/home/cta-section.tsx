@@ -23,9 +23,9 @@ const ctaCards = [
   },
   {
     icon: Leaf,
-    title: "了解更多",
-    description: "探索我们的零碳使命与愿景",
-    href: "/about",
+    title: "建材采购",
+    description: "查看低碳建材并提交项目询价",
+    href: "/materials",
     gradient: "from-brand-forest to-brand-forest/80",
   },
 ]
@@ -55,7 +55,7 @@ export default function CtaSection() {
                     <h3 className="text-xl font-bold mb-2">{card.title}</h3>
                     <p className="text-white/80 mb-5 text-sm">{card.description}</p>
                     <Button variant="secondary" className="rounded-full group-hover:bg-white group-hover:text-foreground transition-colors">
-                      立即探索 <ArrowRight className="ml-2 h-4 w-4" />
+                      {card.title === "房屋预订" ? "浏览房源" : card.title === "定制设计" ? "开始定制" : "进入选材"} <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </CardContent>
                 </Card>

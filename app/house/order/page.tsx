@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { FormEvent, useState, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
@@ -10,6 +10,9 @@ import Navbar from "@/components/navbar"
 import Footer from "@/components/footer"
 import Image from "next/image"
 import Reveal from "@/components/motion/reveal"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 
 const exteriorOptions = [
   {
@@ -61,6 +64,8 @@ export default function OrderPage() {
   const [selectedExterior, setSelectedExterior] = useState(exteriorOptions[0].id)
   const [selectedPower, setSelectedPower] = useState(powerOptions[0].id)
   const [selectedAddons, setSelectedAddons] = useState<string[]>([])
+  const [consultationOpen, setConsultationOpen] = useState(false)
+  const [consultationSent, setConsultationSent] = useState(false)
 
   const currentExterior = exteriorOptions.find((o) => o.id === selectedExterior) ?? exteriorOptions[0]
 
@@ -78,6 +83,10 @@ export default function OrderPage() {
 
   const toggleAddon = (id: string) => {
     setSelectedAddons((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]))
+  }
+  const submitConsultation = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setConsultationSent(true)
   }
 
   return (
@@ -120,8 +129,8 @@ export default function OrderPage() {
                   </div>
                   <p className="text-xs text-muted-foreground mb-5">含税价格，交付时间约90天</p>
                   <div className="grid grid-cols-2 gap-3">
-                    <Button className="bg-primary hover:bg-primary/90 rounded-full">立即订购</Button>
-                    <Button variant="outline" className="rounded-full">预约咨询</Button>
+                    <Button className="bg-primary hover:bg-primary/90 rounded-full" onClick={() => { setConsultationSent(false); setConsultationOpen(true) }}>提交方案需求</Button>
+                    <Button variant="outline" className="rounded-full" onClick={() => { setConsultationSent(false); setConsultationOpen(true) }}>预约咨询</Button>
                   </div>
                 </div>
 
@@ -255,14 +264,23 @@ export default function OrderPage() {
                   <span className="text-2xl font-bold text-primary">{formatPrice(totalPrice)}</span>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <Button className="bg-primary hover:bg-primary/90 rounded-full">立即订购</Button>
-                  <Button variant="outline" className="rounded-full">预约咨询</Button>
+                  <Button className="bg-primary hover:bg-primary/90 rounded-full" onClick={() => { setConsultationSent(false); setConsultationOpen(true) }}>提交方案需求</Button>
+                  <Button variant="outline" className="rounded-full" onClick={() => { setConsultationSent(false); setConsultationOpen(true) }}>预约咨询</Button>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </main>
+      <Dialog open={consultationOpen} onOpenChange={setConsultationOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{consultationSent ? "定制需求已收到" : "预约零碳空间顾问"}</DialogTitle>
+            <DialogDescription>{consultationSent ? "当前为演示版，需求尚未真实发送。接入 CRM 或表单服务后，顾问即可跟进。" : `已记录您的配置：${currentExterior.name}、${powerOptions.find((option) => option.id === selectedPower)?.name}，参考预算 ${formatPrice(totalPrice)}。`}</DialogDescription>
+          </DialogHeader>
+          {consultationSent ? <Button className="w-full" onClick={() => setConsultationOpen(false)}>完成</Button> : <form className="space-y-4" onSubmit={submitConsultation}><Input required name="name" placeholder="姓名 / 公司名称" /><Input required name="contact" placeholder="手机或邮箱" /><Textarea name="project" placeholder="项目地点、用途、预计开工时间（选填）" /><Button type="submit" className="w-full">提交咨询需求</Button></form>}
+        </DialogContent>
+      </Dialog>
       <Footer />
     </div>
   )
